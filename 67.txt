@@ -1,0 +1,81 @@
+import random
+class Student:
+    def __init__(self,name,):
+        self.name=name
+        self.grades={}
+    def result(self):
+        if not self.grades:
+            print(f" {self.name} не проходил тест")
+        else:
+            for test_name, grade in self.grades.items():
+                print(f" рeзультаты: {test_name} - {grade}")
+    def open_test(self, test_name, filename):
+        if test_name in self.grades:
+            print('вы уже прошли тест')
+            return
+        with open(filename, 'r', encoding='utf-8') as f:
+            lines=[line.strip() for line in f.readlines() if line.strip()]
+            print(lines)
+        total = len(lines)//6
+        kolvo = 0
+        for i in range(total):
+            block = lines[i*6 : i*6 + 6]
+            ques = block[0]
+            option = block[1:5]
+            num = int(block[5])
+            correct = option[num-1]
+            random.shuffle(option)
+            grade = 0
+            print(f'Вопрос - {i+1} : {ques}')
+            for j in range(4):
+                print(f'{j+1}. {option[j]}')
+            while True:
+                otvet = int(input('Введите ответ'))
+                if 1 <= otvet <= 4:
+                    break
+                if otvet-1 == num:
+                    kolvo += 1
+        ocenka = (kolvo / total) * 100
+        if ocenka < 60:
+            grade = 2
+        elif ocenka >= 60:
+            grade = 3
+        elif ocenka >= 75:
+            grade = 4
+        else:
+            grade = 5
+        print(f'Правильных ответов: {kolvo}. Оценка - {grade}')
+        self.grades[test_name]=grade
+        with open('3.txt', 'a', encoding='utf-8') as f:
+            f.write(f'{self.name} - {test_name} - {grade}\n')
+name=input('Введите имя: ')
+student = Student(name)
+tests = {'История': '2.txt'}
+while True:
+    print('--МЕНЮ--')
+    print('1. Результаты')
+    print('2. Пройти тест')
+    print('3. Выход')
+    choice = input('Выберите действие ')
+    if choice == '1':
+        student.result()
+    elif choice == '2':
+        available = []
+        for t in tests:
+            if t not in student.grades:
+                available.append(t)
+        if not available:
+            print('Вы прошли все доступные действия')
+            continue
+        print('Доступые тесты')
+        for i, t in enumerate(available, 1):
+            print(f'{i}. {t}')
+        test_idx = int(input('Выберите номер ')) - 1
+        if 0 <= test_idx < len(available):
+            chosen_test = available[test_idx]
+            student.open_test(chosen_test, tests[chosen_test])
+        else:
+            print('Неверный номер ')
+    elif choice == '3':
+        print('Досвидания!!')
+        break
